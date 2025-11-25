@@ -1,0 +1,12 @@
+<!-- classifier/templates/classifier/result.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Prediction Result</title>
+</head>
+<body>
+    <h1>Prediction: {{ prediction }}</h1>
+    <a href="{% url 'upload_image' %}">Upload another image</a>
+</body>
+</html>
