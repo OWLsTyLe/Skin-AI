@@ -1,7 +1,7 @@
 from PIL import Image
 import torch
 from torchvision import transforms
-from model import AiSkinModel, CLASSES
+from .model import AiSkinModel, CLASSES
 
 transform = transforms.Compose([
     transforms.Resize((128, 128)),

@@ -1,5 +1,6 @@
 import torch
 import torch.nn as nn
+import numpy as np
 from torchvision import models, transforms
 from PIL import Image
 import os
@@ -47,3 +48,8 @@ class AiSkinModel:
             pred_class = CLASSES[pred_idx]
 
         return CLASS_NAMES.get(pred_class, "Невідома хвороба")
+
+    def extract_features(self, image_path):
+        # повертаємо масив числових ознак для статистики
+        # наприклад, просто випадкові числа для демонстрації
+        return np.random.rand(5)  # 5 ознак
