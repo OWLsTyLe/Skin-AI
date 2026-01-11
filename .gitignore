@@ -1,0 +1,37 @@
+# Virtual environment
+.venv/
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Django stuff
+db.sqlite3
+/staticfiles/
+media/
+
+# PyTorch checkpoints (якщо є)
+*.pth
+*.pt
+
+# IDE
+.idea/
+*.iml
+
+#source .venv/bin/activate
+
+# Virtual environment
+.venv/
+
+# PyTorch models
+*.pth
+
+# SQLite
+db.sqlite3
+
+# Python cache
+__pycache__/
+*.pyc
+
