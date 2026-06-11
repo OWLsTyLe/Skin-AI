@@ -24,14 +24,22 @@ CLASS_NAMES = {
 class AiSkinModel:
     def __init__(self):
 
+        if not os.path.exists(MODEL_PATH):
+            raise FileNotFoundError(f"Модель не знайдена: {MODEL_PATH}")
+
         self.model = models.mobilenet_v2(weights=None)
         self.model.classifier[1] = nn.Linear(self.model.last_channel, len(CLASSES))
 
-        if os.path.exists(MODEL_PATH):
-            self.model.load_state_dict(torch.load(MODEL_PATH, map_location="cpu"))
-            self.model.eval()
+        # Завантажуємо що є — або state_dict, або повна модель
+        checkpoint = torch.load(MODEL_PATH, map_location="cpu")
+        if isinstance(checkpoint, dict):
+            # це state_dict
+            self.model.load_state_dict(checkpoint)
         else:
-            raise FileNotFoundError(f"Модель не знайдена: {MODEL_PATH}")
+            # це повна модель
+            self.model = checkpoint
+
+        self.model.eval()
 
         self.transform = transforms.Compose([
             transforms.Resize((224, 224)),
@@ -40,16 +48,36 @@ class AiSkinModel:
 
     def predict_image(self, image_path):
         img = Image.open(image_path).convert("RGB")
-        img = self.transform(img).unsqueeze(0)
+        img_tensor = self.transform(img).unsqueeze(0)
 
         with torch.no_grad():
-            output = self.model(img)
+            output = self.model(img_tensor)
             pred_idx = output.argmax(dim=1).item()
             pred_class = CLASSES[pred_idx]
 
         return CLASS_NAMES.get(pred_class, "Невідома хвороба")
 
     def extract_features(self, image_path):
-        # повертаємо масив числових ознак для статистики
-        # наприклад, просто випадкові числа для демонстрації
-        return np.random.rand(5)  # 5 ознак
+        # Реальні ознаки з фото через forward hook на передостанній шар
+        img = Image.open(image_path).convert("RGB")
+        img_tensor = self.transform(img).unsqueeze(0)
+
+        features = []
+
+        def hook_fn(module, input, output):
+            features.append(output.squeeze().detach().numpy())
+
+        hook = self.model.features[-1].register_forward_hook(hook_fn)
+
+        with torch.no_grad():
+            self.model(img_tensor)
+
+        hook.remove()
+
+        if features:
+            feat = features[0]
+            if feat.ndim > 1:
+                feat = feat.mean(axis=(-2, -1))
+            return feat[:5]
+        else:
+            return np.zeros(5)
